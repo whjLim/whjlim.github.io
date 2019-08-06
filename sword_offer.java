@@ -1,5 +1,6 @@
 ﻿public class Solution{
 	/*
+	merger
 	sword - > 1
 	二维数组查找
 	1 343 828 762
@@ -480,11 +481,543 @@
 		return max;
     }
 	/*
-	sword -> 4
-	连续子数组的最大和
-	21:29 2019/8/5
-	有毒 ->
+	9:02 2019/8/6 新的一天，新的征途
 	*/
+	/*
+	sword --> 1
+	整数中1出现的次数(1-n)
+	9:27 2019/8/6
+	思路：
+	各位数为abcdefg,
+	每位有0-a,0-b,0-c,0-d ... 0-g的数可以选
+	注意： 当高未满时，低位有0-9的方案可以选
+	所以
+	g = 1 有 abcdef +1 或者 abcdef 种 (g==0)
+	f = 1 有 (abcde)f(g) 10*(abcde+1) 或 10*(abcde)
+	e = 1 有 (abcd)e(fg) 100*(abcd+1) 
+	....
+	a = 1 有 (bcdefg+1) 或(1000000)种
+	以此类推
+	--------
+	21345
+	19475 错
+	18821 对
+    
+	5 = 2134+1
+	4 = 214*10
+	3 = 22*100
+	1 = 3*1000 (错误--01 可以到1000，1只能到345+1)
+	2 
+	21:07 2019/8/6
+	hit：
+	   各个位之间没有考虑清楚：
+	    = 0, =1要特别考虑的
+	*/
+	public int NumberOf1Between1AndN_Solution(int n){
+		int res = 0;
+		int t = n;
+		int after = 1;
+		while(t >= 10){
+			int befor = t / 10;
+			int mod = t % 10;
+			if(mod == 0){
+				res += befor * after;
+			}else if(mod == 1){
+				res += (n % after + 1);
+			}else{
+				res += (befor + 1) * after;
+			}
+			t = befor;
+			after *= 10;
+		}
+		if(t == 1){
+			res += n-after+1; //
+		}else{
+			res += after;
+		}
+		return res;
+	}
+	/*
+	sword --> 2
+	把数组排成最小的数
+	10:52 2019/8/6
+	11:24 2019/8/6
+	[3,32,321] ->变成321323
+	332321
+	332132
+	323321
+	323213
+	321332
+	321323
 	
+	按 特殊规则 排序
+	//频繁创建字符串？
+	int cmd(int a, int b){
+		String as = String.valueOf(a);
+		String bs = String.valueOf(b);
+		String ab = as + bs;
+		String ba = bs + as;
+		if(ab.compareTo(ba) < 0){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	int cmd(int a, int b){
+		String as = String.valueOf(a);
+		String bs = String.valueOf(b);
+		String ab = as + bs;
+		String ba = bs + as;
+		if(ab.compareTo(ba) < 0){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	21:29 2019/8/6
+	快排写错了，比较不是左右比较，是跟分割元素比较
+	*/
+	int cmd(String as, String bs){
+
+		String ab = as + bs;
+		String ba = bs + as;
+		
+		return ab.compareTo(ba); //0相等  < 0 小  >0 大于 
+	}
+	
+	
+	
+	public String PrintMinNumber(int[] numbers){
+		if(null == numbers || numbers.length == 0)return ""; //
+		String[] strNums = new String[numbers.length];
+		for(int i = 0, len = numbers.length; i < len; i++){
+			strNums[i] = String.valueOf(numbers[i]);
+		}
+		quickSort(strNums, 0, strNums.length-1);
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0, len = strNums.length(); i < len; i++){
+			sb.append(strNums[i]);
+		}
+		return ab.toString();
+		
+	}
+	//手写个快排序吧，复习个
+	public void quickSort(String[] strs, int l, int r){
+		if(l < r){
+			int mid = parament(strs, l, r);
+			quickSort(strs, l, mid-1);
+			quickSort(strs, mid+1, r);
+		}
+	}
+	public int parament(String[] strs, int l, int r){
+		
+		String temp = strs[l];
+		while(l < r){
+			while(r > l && cmd(strs[r], strs[l]) >= 0)r--;
+			strs[l] = strs[r];
+			
+			while(l < r && cmd(strs[l], strs[r]) <= 0)l++;
+			strs[r] = strs[l];
+			
+		}
+		strs[l] = temp;
+		return l;
+	}
+	/*
+	sword -> 3
+	丑数
+	12:01 2019/8/6
+	质因子只含有2,3,5
+	6,8是 14不是1是第一个
+	1
+	5 3 2
+	0 0 1
+	0 1 0
+	0 0 2
+	1 0 0
+	1   1  = 1         5 3 2    1
+	2   2  = 2         0 0 1	2	1个2              = f(1)*2
+	3   3  = 3         0 1 0	3 	1个3              = f(1)*3
+	4   4  = 2*2       0 0 2	4	2个2              = f(2)*2
+	5   5  = 5         1 0 0	5	1个5              = f(1)*5  -1结束
+	6   6  = 2*3       0 1 1	6	1个3，1个2        = f(2)*3 = f(3)*2
+	7   8  = 2*2*2     0 0 3	7	3个2              = f(4)*2
+	8   9  = 3*3       0 2 0	8	2个3              = f(3)*3
+	9   10 = 2*5       1 0 1	9	1个5,1个2         = f(2)*5  =f(5)*2   -2结束
+	10  12 = 2*2*3     0 1 2	10	1个3,2个2         = f(4)*3 = f(6)*2
+	11  15 = 3*5       1 1 0	11 	1个5,1个3         = f(3)*5 = f(5)*3 -3结束
+	12  16 = 2*2*2*2   0 0 4	12	4个2              = f(7)*2;
+	13  18 = 2*3*3     0 2 1	13	2个3，1个2        = f(6)*3 = f(8)*2;
+	14  20 = 2*2*5     1 0 2	14	1个5,2个2         = f(4)*5 =f(9)*2 -4结束
+	15  24 = 2*2*2*3   0 1 3	15	1个3,3个2         = f(7)*3 = f(10)*2
+	16  25 = 5*5       2 0 0	16	2个5              = f(5)*5 -5结束
+	17  27 = 3*3*3     0 3 0	17	3个3              = f(8)*3
+	18  30 = 2*3*5     1 1 1	18	1个5，1个3,1个2   = f(6)*5 =f(11)*2 = f(9)*3 -6结束
+	19  32 = 2*2*2*2*2 0 0 5	19	5个2              = f(12)*2
+	2 3
+	2*2 = 4
+	3*3 = 9
+	2 3 5
+    2 < 3 < 2*2 < 5 < 2*3 < 2*2*2 < 2*5 < 2*2*3 < 3*5 < 2*2*2*2 < 2*3*3
+	1 * (2-3-22-5)
+	2 * (3,22,2)
+	3 * ()
+	
+	14:55 2019/8/6 思考了半天，觉得是跟2,3,5有关，也有想到后面的数都是前面的数去根{2,3,5}顺序乘下来
+	卡了蛮久的，想不顺通，看了下博客有提到顺序，一点就通，试着撸一发代码
+	21:32 2019/8/6
+	忽略了0的处理
+	*/
+	public int min(int a, int b, int c){
+		if(b < a){
+			a = b;
+		}
+		if(c < a){
+			a = c;
+		}
+		return a;
+	}
+	public int GetUglyNumber_Solution(int index){
+		int five = 0, three = 0, two = 0;
+		int[] ugly = new int[index+1];
+		ugly[0] = 1;
+		for(int i = 1; i < index; i++){
+			
+			int next_two = ugly[two]*2;
+			int next_three = ugly[three]*3;
+			int next_five = ugly[five]*5;
+			ugly[i] = min(next_two, next_three, next_five);
+			if(next_two == ugly[i]){
+				two++;
+			}
+			if(next_three == ugly[i]){
+				three++;
+			}
+			if(next_five == ugly[i]){
+				five++;
+			}
+		}
+		return ugly[index-1];
+	}
+	/*
+	sword -> 4
+	14:58 2019/8/6  
+	第一个只出现一次的字符
+	思路： 直接暴力了吧，统计字符次数和第一个出现的位置，扫描第一个出现的位置就行了
+	21:35 2019/8/6
+	各种细节没处理
+	*/
+	public int FirstNotRepeatingChar(String str){
+		int[] charNums = new int[256];
+		int[] first = new int[256];
+		for(int i = 0, len = str.length; i < len; i++){
+			if(charNums[s.charAt(i)] == 0){
+				first[s.charAt(i)] = i;
+			}
+			charNums[s.charAt(i)]++;
+		}
+		int index = str.length;
+		for(int i = 'a'; i <= 'z'; i++){
+			if(charNums[i] == 1 && first[i] < index){
+				index = first[i];
+			}
+		}
+		for(int i = 'A'; i <= 'Z'; i++){
+			if(charNums[i] == 1 && first[i] < index){
+				index = first[i];
+			}
+		}
+		if(index == str.length){
+			index = -1;
+		}
+		return index;
+	}
+	/*
+	sword -> 5
+	数组中的逆序对
+	前面的数大于后面的数 就是一个逆序对 % 1000000007
+	15:17 2019/8/6
+	16:08 2019/8/6
+	思路：
+		之前好像有做过一道输出逆序数的，大概就是用归并排序的思路进行
+		
+		暴力遍历 n*n，只能%75吧(10^5)
+		
+		归并排序，两边有序对比一下就能计算了
+		(a b c d)(e f g h)
+		归并的时候(a b c d)有序 (e f g h)有序
+		那么逆序数就倒过来，如果 d h 逆序， d g-e 也逆序
+	*/
+	int MOD = 1000000007;
+	int res = 0;
+	public int InversePairs(int[] array){
+		if(null == 0 || array.length == 0)return 0;
+		temp = new int[array.length];
+		mergerSort(array, 0, array.length-1);
+		return res;
+	}
+	/*
+	复习一波归并排序
+	Arrays.copyOfRange();
+	*/
+	public void mergerSort(int[] array, int l, int r){
+		
+		if(l < r){
+			int mid = l + (r-l)/2;
+			mergerSort(array, l, mid);   // l - mid 一段
+			mergerSort(array, mid+1, r); //mid+1 - r 一段
+			//合并的时候统计逆序数
+			/*
+			(l - mid )(mid+1 -- r)
+			*/
+			for(int i = mid; i >= l; i--){
+				for(int j = r; j > mid; j--){
+					if(array[i] > array[j]){
+						res = (res+(j-mid))%MOD;
+						break;
+					}
+				}
+			}
+			merge(array, l, mid, r);
+			
+		}
+	}
+	int[] temp; //排序辅助数组
+	public void merger(int[] array, int l, int mid, int r){
+		int left = l;
+		int right = mid+1;
+		int index = 0;
+		while(left <= mid && right <= r){
+			if(array[left] < array[right]){
+				temp[index++] = array[left++];
+			}else{
+				temp[index++] = array[rigth++];
+			}
+		}
+		while(left <= mid)temp[index++] = array[left++];
+		while(right <= r)temp[index++] = array[rigth++];
+		for(left = l, right = 0; right < index; left++, right++){
+			array[left] = temp[right];
+		}
+	}
+	
+	/*
+	sword -> 6
+	两个链表的第一个公共结点
+	16:11 2019/8/6
+	17:15 2019/8/6
+	思路： 
+		来个头尾相连--形成环 === 问题转换环形链表的入环点？
+		A: 链表起点
+		B：环入口
+		C：环内相遇点 
+		指针慢走走了：A-B-C
+		指针快走走了：A-B-C-B-C
+		A-B = x
+		B-C = y
+		C-B = z
+		最后就是2(x+y) = x+y+z+y => x = z
+		A-B == C-B
+		
+	21:47 2019/8/6  还要解开，不然就死循环了
+	22:16 2019/8/6 脑壳子疼，wa了无数发，flag一下，回头再看看
+	*/
+	public ListNode LoopNode(ListNode head){
+		if(null == head)return null;
+		ListNode slow = head;
+		ListNode fast = head;
+		while(fast != null && slow != null){
+			slow = slow.next;
+			fast = fast.next.next;
+			if(fast == slow){
+				break;
+			}
+		}
+		slow = head;
+		while(slow != fast){
+			slow = slow.next;
+			fast = fast.next;
+		}
+		return slow;
+	}
+	public ListNode FindFirstCommonNode(ListNode pHead1, ListNode pHead2){
+		if(pHead1 == null || pHead2 == null)return null;
+		ListNode head = pHead1;
+		while(head.next != null){
+			head = head.next;
+		}
+		head.next = pHead2;
+		ListNode com = LoopNode(pHead1);
+		head = pHead1;
+		while(head.next != pHead2){
+			head = head.next;
+		}
+		head.next = null;
+		return com;
+	}
+	
+	/*
+	sword -> 7
+	数字在排序数组中出现的次数
+	思路：
+		折半查找，前后统计
+		17:17 2019/8/6
+		17:22 2019/8/6
+	*/
+	public int GetNumberOfK(int[] array, int k){
+		int l = 0, r = array.length-1;
+		int valueIndex = -1;
+		while(l <= r){
+			int mid = l + (r-l)/2;
+			if(array[mid] == k){
+				valueIndex = mid;
+				break;
+			}
+			if(array[mid] < k){
+				l = mid+1;
+			}else{
+				r = mid-1;
+			}
+		}
+		int res = 0;
+		if(valueIndex != -1){
+			res = 1;
+			int i = valueIndex-1;
+			while(i >= 0 && array[i] == array[valueIndex])res++;
+			i = valueIndex+1;
+			while(i < array.length && array[i] == array[valueIndex])res++;
+		}
+		return res;
+	}
+	/*
+	sword -> 8
+	二叉树的深度
+	19:27 2019/8/6
+	19:29 2019/8/6
+	没啥好说的，直接撸
+	*/
+	public int TreeDepth(TreeNode root) {
+        if(null == root)return 0;
+		return Math.max(TreeDepth(root.left), TreeDepth(root.right))+1;
+    }
+	/*
+	sword -> 9
+	平衡二叉树
+	判断是否为平衡二叉树
+	19:39 2019/8/6
+	19:48 2019/8/6
+	思路：
+		1. 先判断是否为二叉排序树
+		2. 在判断高度差是否符合平衡
+		? 需要排序吗? 不需要，不是平衡二叉排序树
+	*/
+	public boolean isSortTree(){
+		
+	}
+	boolean balance = true;
+	int abs(int x){
+		if(x < 0)x = -x;
+		return x;
+	}
+	public int TreeDepth(TreeNode root) {
+        if(null == root)return 0;
+		int left = TreeDepth(root.left);
+		int right = TreeDepth(root.right);
+		if(abs(left-right) > 1)balance = false;
+		return Math.max(left, right)+1;
+    }
+	public boolean IsBalanced_Solution(TreeNode root) {
+        TreeDepth(root);
+		return balance;
+    }
+	/*
+	sword -> 10
+	数组中只出现一次的数字
+	19:51 2019/8/6
+	20:13 2019/8/6
+	两个数字之外，其他的数字都出现了两次
+	思路：	
+	    一个数 异或 他本身 = 0 (00=0,11=0,10=01=1)就0
+		出现两次：x^x = 0
+		所以数组一遍异或运算之后，值为两个不同的值的异或  = a^b;
+        两个不同 -> a^b != 0;
+	*/
+	 public void FindNumsAppearOnce(int [] array,int num1[] , int num2[]) {
+        int ab = 0;// 0^x = x
+		for(int i = 0, len = array.length; i < len; i++){
+			ab ^= array[i];
+		}
+		//找到第一个 ab 不为1的位置
+		int first = ab & (~(ab-1));
+		num1[0] = 0;
+		num2[0] = 0;
+		for(int i = 0, len = array.length; i < len; i++){
+			if( (array[i] & first) == 0){  // (位运算记得加())
+				num1[0] ^= array[i];
+			}else{
+				num2[0] ^= array[i];
+			}
+		}
+    }
+	/*
+	和为S的连续正数序列
+	22:17 2019/8/6
+	思路：
+		[a-b]的和 为 a*(b-a+1) + ((b-a+1)(b-a))/2 = sum
+		2a*(b-a+1) +(b-a+1)(b-a) = 2sum
+		(b-a+1)*(2a+b-a) = 2sum
+		(b-a+1)*(b+a) = 2sum
+		b2-a2+b+a = 2sum
+		b2+b=2sum+a2-a
+		9~16
+		a = 9
+		b = 16
+	22:50 2019/8/6
+	复习了一下韦达定理
+	
+	*/
+	public ArrayList<ArrayList<Integer> > FindContinuousSequence(int sum) {
+       
+	   ArrayList<ArrayList<Integer>> res = new ArrayList<ArrayList<Integer>>();
+	   for(int i = 1, len = sum/2; i <= len; i++){
+		   int c = 2*sum+i*i-i;
+		   int sqn = 1+4*c;
+		   int c2 = (int)Math.sqrt(sqn);
+		   if(c2*c2 == sqn && (c2 & 1) == 1){
+			   c2 = (c2-1)>>1;
+			   ArrayList<Integer> list = new ArrayList<Integer>();
+			   for(int j = i; j <= c2; j++){
+				   list.add(i);
+			   }
+			   res.add(list);
+		   }
+	   }
+	   return res;
+	   
+    }
+	/*
+	22:53 2019/8/6 在来一道简单的，整整自信心
+	左旋转字符串
+	23:05 2019/8/6 前旋转 -- 后旋转 -- 一起旋转
+	*/
+	public String LeftRotateString(String str,int n) {
+        if(null == str || str.length() == 0)return str;
+		n = n % str.length();
+		if(n == 0)return str;
+		char[] chars = str.toCharArray();
+		rotation(chars, 0, n-1);
+		rotation(chars, n, chars.length-1);
+		rotation(chars, 0, chars.length-1);
+		return String.valueOf(chars);
+    }
+	public void rotation(char[] chars, int l, int r){
+		while(l < r){
+			char t = chars[l];
+			chars[l] = chars[r];
+			chars[r] = t;
+			l++;
+			r--;
+		}
+	}
 	
 }
