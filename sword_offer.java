@@ -1019,5 +1019,329 @@
 			r--;
 		}
 	}
+	/*
+	sword -> 
+	0:12 2019/8/7 这一题结束睡觉
+	机器人的运动范围
+	不能进入行坐标和列坐标的数位之和大于k的格子
+	0:43 2019/8/7
+	*/
+	int[] fx = new int[]{-1,1,0,0};
+	int[] fy = new int[]{0,0,-1,1};
+	int res;
+	boolean[][] visit;
+	int[] numssum;
+	int n, m;
+	int limit;
+	void dfs(int x, int y){
+		for(int i = 0; i < 4; i++){
+			int xi = x + fx[i];
+			int yi = y + fy[i];
+			if(xi < 0 || yi < 0 || xi >= n || yi >= m || visit[xi][yi] ||(numssum[xi]+numssum[yi]) > limit)continue;
+			visit[xi][yi] = true;
+			res++;
+			dfs(xi,yi);
+		}
+	}
 	
+	public int movingCount(int threshold, int rows, int cols)
+    {
+		if(threshold < 0)return 0;
+        visit = new boolean[rows][cols];
+		n = rows;
+		m = cols;
+		limit = threshold;
+		numssum = new int[Math.max(rows, cols)];
+		for(int i = 0, len = Math.max(rows, cols); i < len; i++){
+			int s = 0;
+			int t = i;
+			while(t > 0){
+				s += t%10;
+				t = t/10;
+			}
+			numssum[i] = s;
+		}
+		visit[0][0] = true;
+		res = 1;
+		dfs(0,0);
+		return res;
+    }
+	/*
+	19:54 2019/8/7 搬数据的一天，赶紧开工刷刷题
+	sword -> 1
+	翻转单词顺序列
+	19:57 2019/8/7
+	“student. a am I”
+	“I am a student.
+	20:03 2019/8/7
+	*/
+	 public String ReverseSentence(String str) {
+		if(null == str || str.trim().equals(""))return str;
+        String[] strs = str.split(" ");
+		StringBuilder sb = new StringBuilder();
+		sb.append(strs[strs.length-1]);
+		for(int i = strs.length-2; i >= 0; i--){
+			sb.append(" ");
+			sb.append(strs[i]);
+		}
+		return sb.toString();
+    }
+	/*
+	sword-> 2
+	扑克牌顺子
+	20:06 2019/8/7
+	思路：
+		简单排个序，前后比较差值
+		[0,3,2,6,4]
+		0 2 3 4 6
+		20:20 2019/8/7
+	*/
+	public boolean isContinuous(int [] numbers) {
+		if(null == numbers || numbers.length == 0)return false;
+		Arrays.sort(numbers);
+		int zeroIndex = 0;
+		while(numbers[zeroIndex] == 0){
+			zeroIndex++;
+		}
+		for(int i = zeroIndex+1, len = numbers.length; i < len; i++){
+			if(numbers[i] - numbers[i-1] > 1){
+				zeroIndex  = zeroIndex - (numbers[i] - numbers[i-1] - 1);
+				if(zeroIndex < 0)
+					return false;
+			}else if(numbers[i] == numbers[i-1])
+				return false;
+		}
+		return true;
+    }
+	/*
+	sword -> 3
+	把字符串转换成整数
+	20:29 2019/8/7
+	20:36 2019/8/7
+	*/
+	public int StrToInt(String str) {
+        if(null == str || str.length() == 0)return 0;
+		int index = 0;
+		if(str.charAt(index) == '+' || str.charAt(index) == '-'){
+			index++;
+		}
+		int res = 0;
+		for(int i = index, len = str.length(); i < len; i++){
+			if(str.charAt(i) >= '0' && str.charAt(i) <= '9'){
+				res = res*10 + (str.charAt(i)-'0');
+			}else{
+				return 0;
+			}
+		}
+		if(index > 0 && str.charAt(index-1) == '-'){
+			res = -res;
+		}
+		return res;
+    }
+	/*
+	sword -> 4
+	长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的
+	20:46 2019/8/7
+	21:02 2019/8/7
+	思路： 
+		震惊，居然直接暴力
+	
+	*/
+	public boolean duplicate(int numbers[],int length,int [] duplication) {
+        if(length <= 0)return false;
+        boolean[] visit = new boolean[length];
+        for(int i = 0; i < length; i++){
+            if(visit[numbers[i]]){
+               duplication[0] = numbers[i];
+                return true;
+            }
+            visit[numbers[i]] = true;
+        }
+        return false;
+    }
+	
+	/*
+	sword -> 5
+	构建乘积数组
+	给定一个数组A[0,1,...,n-1],
+	请构建一个数组B[0,1,...,n-1],
+	其中B中的元素B[i]=A[0]*A[1]*...*A[i-1]*A[i+1]*...*A[n-1]。
+	不能使用除法。
+	21:06 2019/8/7
+	思路： 
+		a[0,1,2,3,4,5,6,7,8,9]
+		b[0] = a[1,2,3,4,5,6,7,8,9]
+		b[1] = a[0,2,3,4,5,6,7,8,9]
+		b[2] = a[0,1,3,4,5,6,7,8,9]
+		b[3] = a[0,1,2,4,5,6,7,8,9]
+		b[4] = a[0,1,2,3,5,6,7,8,9]
+		b[5] = a[0,1,2,3,4,6,7,8,9]
+		b[6] = a[0,1,2,3,4,5,7,8,9]
+		b[7] = a[0,1,2,3,4,5,6,8,9]
+		b[8] = a[0,1,2,3,4,5,6,7,9]
+		b[9] = a[0,1,2,3,4,5,6,7,8]
+		看起来就是 不要一口气算一个数，大家都慢慢的数，最后在一起算完
+		也就是遍历数组，对于下标 i，除了b[i],都乘上a[i];
+	21:45 2019/8/7 
+	暴力，没超时，能优化吗？
+	*/
+	public int[] multiply(int[] A) {
+		if(A== null || A.length == 0)return A;
+        int[] B = new int[A.length];
+		
+		for(int i = 0, len = A.length; i < len; i++){
+			B[i] = 1;
+		}
+		for(int i = 0, len = A.length; i < len; i++){
+			for(int j = 0; j < len; j++){
+				if(i != j){
+					B[j] *= A[i];
+				}
+			}
+		}
+		return B;
+    }
+	
+	/*
+	表示数值的字符串
+	请实现一个函数用来判断字符串是否表示数值（包括整数和小数）。
+	例如，字符串"+100","5e2","-123","3.1416"和"-1E-16"都表示数值。
+	但是"12e","1a3.14","1.2.3","+-5"和"12e+4.3"都不是。
+	22:01 2019/8/7
+	思路：
+		1. 第一个是否正负号
+		2. 是否有e
+		3. e之后是否有正负号
+		4. e之后是否有小数点
+		5. e之后得有数
+		6. e之前不能是.
+		22:48 2019/8/7
+	*/
+	public boolean isNumeric(char[] str) {
+        if(null == str || str.length == 0)return false;
+        int index = 0; //
+
+        int len = str.length;
+        boolean flage = false;
+        int point = 0; //小数点
+
+        if(str[index] == '+' || str[index] == '-')
+            index++;
+        for(int i = index; i < len; i++){
+            if(str[i] == 'e' || str[i] == 'E'){
+				if(i > 0 && str[i-1] == '.')
+					return false;
+                if(flage)return false;
+                flage = true;
+            }else if(str[i] == '.'){
+                if(!flage && point == 0){
+                    point = 1;
+                }else{
+                    return false;
+                }
+            }else if(str[i] == '+' || str[i] == '-'){
+                if(str[i-1] != 'e' && str[i-1] != 'E'){
+                    return false;
+                }
+            }else if(str[i] < '0' || str[i] > '9'){
+                return false;
+            }
+        }
+        return true;
+		
+    }
+	/*
+	22:53 2019/8/7
+	尼玛，怎么那么多乱七八糟的题目，看到眼睛酸，腰疼，行吧行吧，先把剩下的秒题秒了
+	*/
+	/*
+	删除链表中重复的结点
+	在一个排序的链表中，存在重复的结点，
+	请删除该链表中重复的结点，
+	重复的结点不保留，返回链表头指针。 
+	例如，链表1->2->3->3->4->4->5 处理后为 1->2->5
+	22:54 2019/8/7 
+	思路:
+		
+	23:10 2019/8/7
+	*/
+	public ListNode deleteDuplication(ListNode pHead)
+    {
+		ListNode head = pHead;
+		ListNode pre = null;
+		while(pHead != null && pHead.next != null){//下一个不是空才有判断的意义
+			if(pHead.val == pHead.next.val){
+				while(pHead.next != null && pHead.val == pHead.next.val){
+					pHead = pHead.next;
+				}
+				if(pre != null){
+					pre.next = pHead.next;
+				}else{
+					head = pHead.next;
+				}
+			}else{
+				pre = pHead;
+			}
+			pHead = pHead.next;
+		}
+		return head;
+    }
+	/*
+	23:11 2019/8/7
+	二叉树的下一个结点
+	
+	给定一个二叉树和其中的一个结点，请找出中序遍历顺序的下一个结点并且返回。
+	注意，树中的结点不仅包含左右子结点，同时包含指向父结点的指针。
+	
+	思路：
+		中序遍历的下一个节点？
+		下一个节点，我还没遍历过，我怎么知道下一个节点是啥
+		思路反转，记录上一个节点，
+		那么，如果我的上一个节点是pNode, 那么我就是pNode的下一个节点
+    =============================
+	   但是这里还给了父亲节点的信息，那么
+	   中序遍历，如果我有右孩子，那么我的下一个节点就是我的右孩子的左子树点
+	             如果我没有右孩子，那么我的下一个节点就是祖先节点
+				     如果我是父节点的左孩子，我父节点就是我下一个节点
+					 如果我是父节点的右孩子，
+						 如果我的父节点是左孩子，父节点的父节点就是我下一个节点
+						 如果我的父节点是右孩子，父节点的父节点就要递归上去
+	23:43 2019/8/7
+	舒服，一发入魂
+	*/
+	class TreeLinkNode {
+    int val;
+    TreeLinkNode left = null;
+    TreeLinkNode right = null;
+    TreeLinkNode next = null;
+
+    TreeLinkNode(int val) {
+        this.val = val;
+    }
+	 public TreeLinkNode GetNext(TreeLinkNode pNode)
+    {
+        if(pNode== null)return null;
+		if(pNode.right != null){//我有右孩子
+			TreeLinkNode next = pNode.right;
+			while(next.left != null) next = next.left;
+			return next;
+		}else{
+			return NextIsParent(pNode);
+		}
+    }
+	/*
+	如果我没有右孩子，那么我的下一个节点就是祖先节点
+				     如果我是父节点的左孩子，我父节点就是我下一个节点
+					 如果我是父节点的右孩子，
+						 如果我的父节点是左孩子，父节点的父节点就是我下一个节点
+						 如果我的父节点是右孩子，父节点的父节点就要递归上去
+	*/
+	public TreeLinkNode NextIsParent(TreeLinkNode pNode){
+		if(pNode.next == null)return null;
+		if(pNode.next.left == pNode){//如果我是父节点的左孩子，我父节点就是我下一个节点
+			return pNode.next;
+		}else{
+			return NextIsParent(pNode.next);
+		}
+	}
 }
