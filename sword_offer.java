@@ -1184,6 +1184,13 @@
 		也就是遍历数组，对于下标 i，除了b[i],都乘上a[i];
 	21:45 2019/8/7 
 	暴力，没超时，能优化吗？
+	1:05 2019/8/8
+	有的
+	两个辅助数组
+	befor[i] 存储0-(i-1)的乘机
+	after[i] 存储(i+1)-底的乘机
+	B[i] = befor[i]*after[i];
+	三趟遍历O(n)
 	*/
 	public int[] multiply(int[] A) {
 		if(A== null || A.length == 0)return A;
@@ -1344,4 +1351,214 @@
 			return NextIsParent(pNode.next);
 		}
 	}
+	/*
+	按之字形顺序打印二叉树
+	23:55 2019/8/7
+	0:26 2019/8/8
+	*/
+	public ArrayList<ArrayList<Integer> > Print(TreeNode pRoot) {
+		if(pRoot == null)return new ArrayList<ArrayList<Integer> >();
+		ArrayList<ArrayList<Integer>> res = new ArrayList<ArrayList<Integer> >();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
+		Queue<TreeNode> que = new LinkedList<TreeNode>();
+		int zf = 0;
+		que.offer(pRoot);
+		TreeNode temp = null;
+		while(!que.isEmpty()||!stack.isEmpty()){
+			
+			ArrayList<Integer> list = new ArrayList<Integer>();
+			if((zf & 1) ==  0){//从队列拿，左右入栈
+                Queue<TreeNode> rotation = new LinkedList<TreeNode>();
+				while(!que.isEmpty()){
+					temp = que.poll();
+					list.add(temp.val);
+					if(temp.left != null){
+						rotation.add(temp.left);
+					}
+					if(temp.right != null){
+						rotation.add(temp.right);
+					}
+				}
+                while(!rotation.isEmpty()){
+					stack.push(rotation.poll());
+				}
+                
+			}else{//从栈拿，右到左入栈在入队
+				Stack<TreeNode> rotation = new Stack<TreeNode>();
+				while(!stack.isEmpty()){
+					temp =  stack.pop();
+					list.add(temp.val);
+					if(temp.right != null){
+						rotation.push(temp.right);
+					}
+					if(temp.left != null){
+						rotation.push(temp.left);
+					}
+				}
+				while(!rotation.isEmpty()){
+					que.offer(rotation.pop());
+				}
+			}
+			res.add(list);
+			zf++;
+		}
+        return res;
+    }
+	/*
+	把二叉树打印成多行
+	0:27 2019/8/8
+	0:30 2019/8/8
+	复制上一题修改一下
+	*/
+	public ArrayList<ArrayList<Integer> > Print(TreeNode pRoot) {
+		if(pRoot == null)return new ArrayList<ArrayList<Integer> >();
+		ArrayList<ArrayList<Integer>> res = new ArrayList<ArrayList<Integer> >();
+		Queue<TreeNode> que = new LinkedList<TreeNode>();
+		int zf = 0;
+		que.offer(pRoot);
+		TreeNode temp = null;
+		while(!que.isEmpty()){
+			
+			ArrayList<Integer> list = new ArrayList<Integer>();
+			Queue<TreeNode> rotation = new LinkedList<TreeNode>();
+			while(!que.isEmpty()){
+				temp = que.poll();
+				list.add(temp.val);
+				if(temp.left != null){
+					rotation.add(temp.left);
+				}
+				if(temp.right != null){
+					rotation.add(temp.right);
+				}
+			}
+			que = rotation;
+			res.add(list);
+		}
+        return res;
+    }
+	/*
+	对称的二叉树
+	请实现一个函数，用来判断一颗二叉树是不是对称的。
+	注意，如果一个二叉树同此二叉树的镜像是同样的，定义其为对称的。
+	0:31 2019/8/8
+	0:35 2019/8/8
+	*/
+	boolean isSymmetrical(TreeNode pRoot)
+    {
+        if(pRoot == null)return true;
+		return isSymmetrical(pRoot.left,pRoot.right);
+    }
+	boolean isSymmetrical(TreeNode left, TreeNode right){
+		if(left == null && right == null)return true;
+		if(left == null || right == null)return false;
+		if(left.val == right.val){
+			return isSymmetrical(left.left, right.right) && isSymmetrical(left.right, right.left);
+		}else{
+			return false;
+		}
+	}
+	// 19:38 2019/8/8 立秋了，时间过得真快
+	/*
+	sword -> 1
+	19:39 2019/8/8
+	请实现两个函数，分别用来序列化和反序列化二叉树
+	思路：
+		有点懵，序列化是遍历？
+		--输入是啥，不知道，汗
+	*/
+	String Serialize(TreeNode root) {
+        if(null == root)return null;
+		Queue<TreeNode> que = new LinkedList<TreeNode>();
+		que.offer(root);
+		StringBuilder sb = new StringBuilder();
+		while(!que.isEmpty()){
+			TreeNode t = que.poll();
+			if(t != null){
+				sb.append(t.val);
+				que.offer(t.left);
+				que.offer(t.right);
+			}else{
+				sb.append("#");
+			}	
+		}
+		return sb.toString();
+	}
+    TreeNode Deserialize(String str) {
+       if(null == str || str.length() == 0)return null;
+	   char[] cs = str.toCharArray();
+	   int index = 0;
+	   TreeNode root = new TreeNode(cs[index++]-'0');
+	   Queue<TreeNode> que = new LinkedList<TreeNode>();
+        que.offer(root);
+	   while(!que.isEmpty()){
+		   TreeNode t = que.poll();
+		   if(index < cs.length && cs[index] != '#'){
+			   t.left = new TreeNode(cs[index++]-'0');
+			   que.offer(t.left);
+		   }
+		   if(index < cs.length && cs[index] != '#'){
+			   t.right = new TreeNode(cs[index++]-'0');
+			   que.offer(t.right);
+		   }
+	   }
+	   return root;
+	}
+	
+	/*
+	sword -> 2
+	二叉搜索树的第k个结点
+	*/
+	TreeNode knode = null;
+	int index = 0;
+	TreeNode KthNode(TreeNode pRoot, int k)
+    {
+		LDR(pRoot, k);
+		return knode;
+    }
+	void LDR(TreeNode pRoot, int k)
+    {
+        if(null != pRoot && index < k){
+			LDR(pRoot.left,k);
+			index++;
+			if(index == k){
+				knode = pRoot;
+			}
+			LDR(pRoot.right,k);
+		}
+    }
+	/*
+	sword -> 3
+	滑动窗口的最大值
+	21:14 2019/8/8
+	2,3,4,2,6,2,5,1
+	max()
+	0:00 2019/8/9
+	静下心来，好好体会优秀的代码
+	*/
+	public ArrayList<Integer> maxInWindows(int [] num, int size)
+    {
+		if(num == null || size <= 0 || size > num.length)return new ArrayList<Integer>();
+        ArrayDeque<Integer>  deque = new ArrayDeque<Integer>();
+        int max = num[0];
+        deque.offerLast(0);
+        for(int i = 1; i < size; i++){
+
+            while(!deque.isEmpty() && num[deque.peekLast()] < num[i])
+                deque.pollLast();
+            deque.offerLast(i);
+            if(num[i] > max)max = num[i];
+        }
+        ArrayList<Integer> res = new ArrayList<Integer>();
+        res.add(max);
+        for(int i = size, len = num.length; i < len; i++){
+            if(deque.peekFirst() == i-size){
+                deque.pollFirst();
+            }
+            while(!deque.isEmpty() && num[deque.peekLast()] < num[i])
+                deque.pollLast();
+            deque.offerLast(i);
+            res.add(num[deque.peekFirst()]);
+        }
+        return res;
+    }
 }
